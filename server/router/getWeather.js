@@ -37,7 +37,8 @@ exports.getWeather = (req, res) => {
   let weatherApiKey = "52629a39796d4916855a846cf99bf244";
   let cityurl = `https://geoapi.qweather.com/v2/city/lookup?location=${location}&key=${weatherApiKey}`;
   let weatherurl = `https://devapi.qweather.com/v7/weather/now?location=${location}&key=${weatherApiKey}`;
-  let getdata = new Array(2);
+  let weatherhistoryurl = `https://devapi.qweather.com/v7/weather/3d?location=${location}&key=${weatherApiKey}`;
+
   /**
    * async模块使用series同步执行函数
    */
@@ -55,7 +56,14 @@ exports.getWeather = (req, res) => {
       callback(null, JSON.parse(data).location);
     });
   }
-  async.series([getweather, getcity], function (error, result) {
+  function getHistoryWeather(callback) {
+    console.log("getHistoryWeather");
+    getGzipped(weatherhistoryurl, function (err, data) {
+      // console.log("history",)
+      callback(null, JSON.parse(data).daily);
+    });
+  }
+  async.series([getweather, getcity,getHistoryWeather], function (error, result) {
     console.log("result", result);
     return res.json({"data":result,msg:"成功"});
   });
